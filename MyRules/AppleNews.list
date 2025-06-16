@@ -11,6 +11,7 @@ DOMAIN-SUFFIX,apple.news
 DOMAIN-SUFFIX,c.apple.news
 DOMAIN-SUFFIX,news-assets.apple.com
 DOMAIN-SUFFIX,news-client-search.apple.com
+DOMAIN-SUFFIX,prodamdnewsencoding.akamaized.net
 DOMAIN-SUFFIX,gateway.icloud.com
 DOMAIN,gspe1-ssl.ls.apple.com
 USER-AGENT,AppleNews*
