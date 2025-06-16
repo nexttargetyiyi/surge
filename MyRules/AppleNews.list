@@ -2,10 +2,10 @@
 # 作者: nexttargetyiyi
 # 仓库: https://github.com/nexttargetyiyi/surge
 # 更新时间: 2025-06-16 20:00:00
-# 域名后缀规则数量: 6
+# 域名后缀规则数量: 8
 # 精准域名规则数量: 1
 # User-Agent规则数量: 2
-# 规则总数: 9
+# 规则总数: 11
 
 DOMAIN-SUFFIX,apple.news
 DOMAIN-SUFFIX,c.apple.news
@@ -13,6 +13,8 @@ DOMAIN-SUFFIX,news-assets.apple.com
 DOMAIN-SUFFIX,news-client-search.apple.com
 DOMAIN-SUFFIX,prodamdnewsencoding.akamaized.net
 DOMAIN-SUFFIX,gateway.icloud.com
+DOMAIN-SUFFIX,news-edge.apple.com
+DOMAIN-SUFFIX,news-app-events.apple.com
 DOMAIN,gspe1-ssl.ls.apple.com
 USER-AGENT,AppleNews*
 USER-AGENT,com.apple.news*
