@@ -1,11 +1,11 @@
-# NAME: AppleNews
-# AUTHOR: nexttargetyiyi
-# REPO: https://github.com/nexttargetyiyi/surge
-# UPDATED: 2025-06-16 20:00:00
-# DOMAIN-SUFFIX: 6
-# DOMAIN: 1
-# USER-AGENT: 2
-# TOTAL: 9
+# 名称: AppleNews
+# 作者: nexttargetyiyi
+# 仓库: https://github.com/nexttargetyiyi/surge
+# 更新时间: 2025-06-16 20:00:00
+# 域名后缀规则数量: 6
+# 精准域名规则数量: 1
+# User-Agent规则数量: 2
+# 规则总数: 9
 
 DOMAIN-SUFFIX,apple.news
 DOMAIN-SUFFIX,c.apple.news
