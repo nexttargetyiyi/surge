@@ -1,16 +1,3 @@
-/*
-注⚠️：脚本的运行需提前在VPS上完成相关操作
-原作者：@GetSomeNeko 由@clydetime 整点猫咪进行了一些修改
-参数介绍：
-url：你的VPS设置的链接
-name：Panel的标题
-icon：Panel的图标
-
-实例：
-argument = url=http://127.0.0.1:7122&name=花里胡哨才是生产力&icon=bolt.horizontal.icloud.fill
-
-*/
-
 (async () => {
   let params = getParams($argument);
   let stats = await httpAPI(params.url);
