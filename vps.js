@@ -1,103 +1,88 @@
 (async () => {
-  let params = getParams($argument);
-  let stats = await httpAPI(params.url);
-  const jsonData = JSON.parse(stats.body);
-  const updateTime = new Date(jsonData.last_time); // 将时间字符串转换成日期对象
-  console.log(updateTime);
-  updateTime.setHours(updateTime.getHours() + 0); // 转换成东八区时间（假定服务器时区为 UTC）
-  const timeString = updateTime.toLocaleString(); // 将日期对象转换成本地时间字符串
-  const totalBytes = jsonData.bytes_total;
-  const inTraffic = jsonData.bytes_sent;
-  const outTraffic = jsonData.bytes_recv;
-  const trafficSize = bytesToSize(totalBytes);
-  const cpuUsage = `${jsonData.cpu_usage}%`;
-  const memUsage = `${jsonData.mem_usage}%`;
-  const uptime = `${jsonData.uptime}`;
+  try {
+    const params = parseParams($argument);
+    const { body } = await fetchData(params.url);
+    const data = JSON.parse(body);
 
-  let panel = {};
-  let shifts = {
-    '1': '#06D6A0',
-    '2': '#FFD166',
-    '3': '#EF476F'
-  };
-  const col = Diydecide(0, 30, 70, parseInt(jsonData.mem_usage));
-  panel.title = params.name || '服务器信息'; // 修改标题
-  panel.icon = params.icon || 'bolt.horizontal.icloud.fill';
-  panel["icon-color"] = shifts[col];
-  panel.content = `CPU:    ${cpuUsage}        |  内存:    ${memUsage}\n` + // 修改 CPU 和 MEM
-    `下载: ${bytesToSize(outTraffic)}  |  上传: ${bytesToSize(inTraffic)}\n` + // 修改 Recv 和 Sent
-    `总流量: ${trafficSize}\n` + // 修改 Total
-    `运行时间: ${formatUptime(jsonData.uptime)}\n` + // 修改 Uptime
-    `上次更新: ${timeString}`; // 修改 Last Update
+    const updateTime = formatTime(data.last_time);
+    const traffic = {
+      total: formatBytes(data.bytes_total),
+      upload: formatBytes(data.bytes_sent),
+      download: formatBytes(data.bytes_recv),
+    };
 
-  $done(panel);
-})().catch((e) => {
-  console.log('error: ' + e);
-  $done({
-    title: '错误', // 修改 Error
-    content: `完蛋了，出错啦！看看是不是端口没打开？${e}`,
-    icon: 'error',
-    'icon-color': '#f44336'
-  });
-});
+    const panel = {
+      title: params.name || '服务器状态面板',
+      icon: params.icon || 'bolt.horizontal.icloud.fill',
+      'icon-color': pickColor(data.mem_usage),
+      content: `
+CPU：${data.cpu_usage}%       |  内存：${data.mem_usage}%
+下载：${traffic.download} |  上传：${traffic.upload}
+总流量：${traffic.total}
+运行时间：${formatUptime(data.uptime)}
+上次更新：${updateTime}
+`.trim()
+    };
 
-function httpAPI(path = '') {
-  let headers = {
-    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/93.0.4577.63 Mobile/15E148 Safari/604.1 EdgiOS/46.7.4.1'
-  };
-  return new Promise((resolve, reject) => {
-    $httpClient.get({
-      url: path,
-      headers: headers,
-    }, (err, resp, body) => {
-      if (err) {
-        reject(err);
-      } else {
-        resp.body = body;
-        resp.statusCode = resp.status ? resp.status : resp.statusCode;
-        resp.status = resp.statusCode;
-        resolve(resp);
-      }
-    });
-  });
+    $done(panel);
+  } catch (err) {
+    console.log('Error:', err);
+    $done({
+      title: '出错啦 ⚠️',
+      content: `💥 检查 API 地址或端口\n错误详情：${err}`,
+      icon: 'xmark.octagon.fill',
+      'icon-color': '#FF3B30',
+    });
+  }
+})();
+
+// === 工具函数区 ===
+
+function fetchData(url) {
+  const headers = {
+    'User-Agent':
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/93.0.4577.63 Mobile/15E148 Safari/604.1',
+  };
+  return new Promise((resolve, reject) => {
+    $httpClient.get({ url, headers }, (err, resp, body) => {
+      if (err) return reject(err);
+      resolve({ ...resp, body });
+    });
+  });
 }
 
-function getParams(param) {
-  return Object.fromEntries(
-    $argument
-      .split('&')
-      .map((item) => item.split('='))
-      .map(([k, v]) => [k, decodeURIComponent(v)])
-  );
+function parseParams(paramStr) {
+  return Object.fromEntries(
+    paramStr.split('&').map(item => item.split('=').map(decodeURIComponent))
+  );
 }
+
+function formatTime(timeStr) {
+  const date = new Date(timeStr);
+  date.setHours(date.getHours() + 0); // 假设是东八区，可以根据需要调整
+  return date.toLocaleString();
+}
+
 function formatUptime(seconds) {
-var days = Math.floor(seconds / (3600 * 24));
-var hours = Math.floor((seconds % (3600 * 24)) / 3600);
-var minutes = Math.floor((seconds % 3600) / 60);
-var result = '';
-if (days > 0) {
-  result += days + ' 天 '; // 修改 day/days
-}
-if (hours > 0) {
-  result += hours + ' 小时 '; // 修改 hour/hours
-}
-if (minutes > 0 || result === '') {
-  result += minutes + ' 分钟'; // 修改 min/mins
-}
-return result.trim(); // 移除末尾空格
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return [d && `${d}天`, h && `${h}小时`, (m || (!d && !h)) && `${m}分钟`]
+    .filter(Boolean)
+    .join(' ');
 }
 
-function bytesToSize(bytes) {
-  if (bytes === 0) return '0 B';
-  let k = 1024;
-  let sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  let i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 }
 
-// 确定变量所在区间
-function Diydecide(x, y, z, item) {
-  let array = [x, y, z];
-  array.push(item);
-  return array.sort((a, b) => a - b).findIndex(i => i === item);
+function pickColor(memUsage) {
+  const value = parseInt(memUsage);
+  if (value < 30) return '#06D6A0'; // 低
+  if (value < 70) return '#FFD166'; // 中
+  return '#EF476F'; // 高
 }
