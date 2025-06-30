@@ -59,7 +59,7 @@ function parseParams(paramStr) {
 
 function formatTime(timeStr) {
   const date = new Date(timeStr);
-  date.setHours(date.getHours() + 0); // 假设是东八区，可以根据需要调整
+  date.setHours(date.getHours() + 0); // 东八区改这里，比如 +8
   return date.toLocaleString();
 }
 
@@ -82,7 +82,7 @@ function formatBytes(bytes) {
 
 function pickColor(memUsage) {
   const value = parseInt(memUsage);
-  if (value < 30) return '#06D6A0'; // 低
-  if (value < 70) return '#FFD166'; // 中
-  return '#EF476F'; // 高
+  if (value <= 40) return '#06D6A0'; // 🟢 绿色（健康）
+  if (value <= 70) return '#FFD166'; // 🟡 黄色（警告）
+  return '#EF476F'; // 🔴 红色（危险）
 }
