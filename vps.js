@@ -59,7 +59,7 @@ function parseParams(paramStr) {
 
 function formatTime(timeStr) {
   const date = new Date(timeStr);
-  date.setHours(date.getHours() + 0); // 东八区改这里，比如 +8
+  date.setHours(date.getHours() + 8); // 东八区改这里，比如 +8
   return date.toLocaleString();
 }
 
